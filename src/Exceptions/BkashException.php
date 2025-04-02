@@ -8,33 +8,23 @@ class BkashException extends Exception
 {
     /**
      * The error code returned by the bKash API.
-     *
-     * @var string|null
      */
     protected ?string $errorCode;
 
     /**
      * The error message returned by the bKash API.
-     *
-     * @var string|null
      */
     protected ?string $errorMessage;
 
     /**
      * Create a new BkashException instance.
-     *
-     * @param string $message
-     * @param string|null $errorCode
-     * @param string|null $errorMessage
-     * @param int $code
-     * @param Exception|null $previous
      */
     public function __construct(
-        string $message = "An error occurred while processing the bKash request.",
+        string $message = 'An error occurred while processing the bKash request.',
         ?string $errorCode = null,
         ?string $errorMessage = null,
         int $code = 0,
-        Exception $previous = null
+        ?Exception $previous = null
     ) {
         $this->errorCode = $errorCode;
         $this->errorMessage = $errorMessage;
@@ -44,8 +34,6 @@ class BkashException extends Exception
 
     /**
      * Get the error code returned by the bKash API.
-     *
-     * @return string|null
      */
     public function getErrorCode(): ?string
     {
@@ -54,8 +42,6 @@ class BkashException extends Exception
 
     /**
      * Get the error message returned by the bKash API.
-     *
-     * @return string|null
      */
     public function getErrorMessage(): ?string
     {
@@ -65,7 +51,6 @@ class BkashException extends Exception
     /**
      * Create a BkashException from an API response.
      *
-     * @param array $response
      * @return static
      */
     public static function fromApiResponse(array $response): self
@@ -87,7 +72,7 @@ class BkashException extends Exception
      */
     public static function tokenGenerationFailed(): self
     {
-        return new static("Failed to generate bKash token.");
+        return new static('Failed to generate bKash token.');
     }
 
     /**
@@ -97,7 +82,7 @@ class BkashException extends Exception
      */
     public static function tokenRefreshFailed(): self
     {
-        return new static("Failed to refresh bKash token.");
+        return new static('Failed to refresh bKash token.');
     }
 
     /**
@@ -107,6 +92,6 @@ class BkashException extends Exception
      */
     public static function invalidCallbackData(): self
     {
-        return new static("Invalid callback data received from bKash.");
+        return new static('Invalid callback data received from bKash.');
     }
 }
