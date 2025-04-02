@@ -1,8 +1,6 @@
 # Laravel bKash Payment Gateway Integration
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/sabitahmad/laravel-bkash.svg?style=flat-square)](https://packagist.org/packages/sabitahmad/laravel-bkash)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/sabitahmad/laravel-bkash/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/sabitahmad/laravel-bkash/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/sabitahmad/laravel-bkash/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/sabitahmad/laravel-bkash/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/sabitahmad/laravel-bkash.svg?style=flat-square)](https://packagist.org/packages/sabitahmad/laravel-bkash)
 
 A comprehensive solution for integrating bKash payments into Laravel applications.
@@ -13,10 +11,7 @@ A comprehensive solution for integrating bKash payments into Laravel application
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Response Handling](#response-handling)
-- [Security](#security)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
+- [Response Handling](#paymentresponse-methods)
 - [License](#license)
 
 ---
@@ -95,7 +90,7 @@ Optionally, you can publish the views using
 
 [//]: # (```)
 
-## Environment Variables
+## Configuration
 
 Add the following environment variables to your `.env` file:
 
@@ -242,18 +237,9 @@ composer test
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
-
 ## Credits
 
 - [Sabit Ahmad](https://github.com/SabitAhmad)
-- [All Contributors](../../contributors)
 
 ## License
 
