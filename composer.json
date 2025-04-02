@@ -1,6 +1,6 @@
 {
     "name": "sabitahmad/laravel-bkash",
-    "description": "Unofficial Bkash Package",
+    "description": "Unofficial Bkash Package for Laravel providing seamless integration with Bkash payment gateway.",
     "keywords": [
         "SabitAhmad",
         "laravel",
