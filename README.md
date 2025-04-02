@@ -111,7 +111,7 @@ BKASH_LOG_TRANSACTIONS=true
 ```
 ## Usage
 
-### Create Payment
+### `Create Payment`
 ```php
 try {
     $payment = Bkash::createPayment(payerReference: 'CUST-001', amount: 100.50, invoiceNumber: 'INV-001'
@@ -129,7 +129,7 @@ try {
 }
 ```
 
-### Execute Payment
+### `Execute Payment`
 ```php
 
 $execution = Bkash::executePayment($paymentId);
@@ -140,8 +140,8 @@ if ($execution->getTransactionStatus() === 'Completed') {
 }
 
 ```
-
-### Handle Callback
+    
+### `Handle Callback`
 
 ```php
 Route::post('/bkash/callback', function (Request $request) {
@@ -156,28 +156,81 @@ Route::post('/bkash/callback', function (Request $request) {
 });
 ```
 
-# Response Handling
+### `Refund Payment`
 
-### PaymentResponse Methods
+- **Description**: Processes a refund for a given payment.
+- **Parameters**:
+    - `string $paymentId`: Original transaction ID.
+    - `float $amount`: Refund amount.
+    - `string $reason`: Refund description.
+- **Returns**: `RefundResponse`
 
-```php
-$response->getPaymentId(): ?string      // TRX123456
-$response->getPaymentUrl(): ?string     // https://sandbox.payment.bkash.com/?paymentId=TR0011dQPHnuY1720518383420
-$response->getAmount(): ?float          // 100.50
-$response->getInvoiceNumber(): ?string  // INV-2023-001
-$response->isSuccess(): bool
-$response->getErrorMessage(): ?string
-```
-### ExecutePaymentResponse Methods
+#### Example
 
 ```php
-$response->getTransactionStatus(): ?string // Completed
-$response->getTrxId(): ?string     // TRX123456
-$response->getPaymentExecuteTime(): ?string   // 2023-10-01T12:00:00+06:00
+$refund = Bkash::refundPayment('TRX123456', 100.50, 'Duplicate payment');
+```
+
+### `Query Payment`
+
+- **Description**: Queries the status of a given payment.
+- **Parameters**:
+    - `string $paymentId`: Payment ID to query.
+- **Returns**: `QueryResponse`
+
+#### Example
+
+```php
+$query = Bkash::queryPayment('TRX123456');
 ```
 
 
+## PaymentResponse Methods
 
+### Core Methods
+| Method           | Returns  | Description                    |
+|------------------|----------|--------------------------------|
+| `isSuccess()`    | `bool`   | Whether operation succeeded    |
+| `getErrorMessage()` | `?string` | Error message if failed        |
+
+### Create Payment Methods
+| Method           | Returns  | Description                    |
+|------------------|----------|--------------------------------|
+| `getPaymentUrl()` | `?string` | Redirect URL for payment        |
+
+### Execute Payment Methods
+| Method                 | Returns    | Description                    |
+|------------------------|------------|--------------------------------|
+| `getTrxId()`           | `?string`  | bKash transaction ID           |
+| `getCustomerMsisdn()`  | `?string`  | Customer phone number          |
+| `getTransactionStatus()` | `?string` | "Completed"/"Failed" etc       |
+| `getPaymentExecuteTime()` | `?Carbon` | Execution timestamp            |
+
+### Common Methods
+| Method                 | Returns    | Description                    |
+|------------------------|------------|--------------------------------|
+| `getPaymentId()`       | `?string`  | Payment ID                     |
+| `getAmount()`          | `?float`   | Transaction amount             |
+| `getInvoiceNumber()`   | `?string`  | Merchant invoice number        |
+| `getStatusCode()`      | `?string`  | bKash status code              |
+| `getStatusMessage()`   | `?string`  | bKash status message           |
+
+## RefundResponse Methods
+| Method                 | Returns    | Description                    |
+|------------------------|------------|--------------------------------|
+| `getRefundId()`        | `?string`  | Unique refund ID               |
+| `getOriginalPaymentId()` | `?string` | Original transaction ID        |
+| `getRefundAmount()`    | `?float`   | Refunded amount                |
+| `getTransactionStatus()` | `?string` | Refund status                  |
+| `isSuccess()`          | `bool`     | Whether refund succeeded       |
+
+## QueryResponse Methods
+| Method                 | Returns    | Description                    |
+|------------------------|------------|--------------------------------|
+| `getTransactionStatus()` | `?string` | Current payment status         |
+| `getAmount()`          | `?float`   | Original amount                |
+| `getPaymentId()`       | `?string`  | Payment ID                     |
+| `isSuccess()`          | `bool`     | Whether query succeeded        |
 
 ## Testing
 
