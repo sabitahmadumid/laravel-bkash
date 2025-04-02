@@ -4,7 +4,6 @@ namespace SabitAhmad\Bkash\Responses;
 
 class QueryResponse extends BaseResponse
 {
-
     public function getPaymentId(): ?string
     {
         return $this->data['paymentID'] ?? null;

@@ -3,7 +3,6 @@
 namespace SabitAhmad\Bkash\Responses;
 
 class RefundResponse extends BaseResponse
-
 {
     public function getRefundId(): ?string
     {
@@ -19,5 +18,4 @@ class RefundResponse extends BaseResponse
     {
         return isset($this->data['amount']) ? (float) $this->data['amount'] : null;
     }
-
 }

@@ -4,7 +4,6 @@ namespace SabitAhmad\Bkash\Responses;
 
 class BaseResponse
 {
-
     protected array $data;
 
     public function __construct(array $data)
@@ -26,5 +25,4 @@ class BaseResponse
     {
         return $this->data['errorMessage'] ?? null;
     }
-
 }

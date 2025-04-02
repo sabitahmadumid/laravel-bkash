@@ -13,7 +13,7 @@ beforeEach(function () {
     Http::fake([
         'checkout.sandbox.bka.sh/v1.2.0-beta/checkout/token/grant' => Http::response([
             'id_token' => 'fake-token',
-            'status' => 'success'
+            'status' => 'success',
         ]),
     ]);
 });
@@ -24,7 +24,7 @@ it('creates payment with valid url', function () {
         'checkout.sandbox.bka.sh/v1.2.0-beta/checkout/payment/create' => Http::response([
             'paymentID' => 'TRX123',
             'bkashURL' => 'https://checkout.sandbox.bka.sh/payment/TRX123',
-            'status' => 'success'
+            'status' => 'success',
         ]),
     ]);
 
@@ -42,7 +42,7 @@ it('handles missing payment url in response', function () {
     Http::fake([
         'checkout.sandbox.bka.sh/v1.2.0-beta/checkout/payment/create' => Http::response([
             'paymentID' => 'TRX124',
-            'status' => 'success'
+            'status' => 'success',
         ]),
     ]);
 
@@ -58,7 +58,7 @@ it('handles payment creation failure', function () {
     Http::fake([
         'checkout.sandbox.bka.sh/v1.2.0-beta/checkout/payment/create' => Http::response([
             'errorMessage' => 'Invalid amount',
-            'status' => 'fail'
+            'status' => 'fail',
         ], 400),
     ]);
 
@@ -78,7 +78,7 @@ it('auto-refreshes token on 401 error', function () {
         ->push([
             'paymentID' => 'TRX125',
             'bkashURL' => 'https://checkout.sandbox.bka.sh/payment/TRX125',
-            'status' => 'success'
+            'status' => 'success',
         ], 200);
 
     $response = Bkash::createPayment(100.00, 'INV-REFRESH-TEST');

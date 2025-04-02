@@ -6,7 +6,6 @@ use Illuminate\Support\Carbon;
 
 class PaymentResponse extends BaseResponse
 {
-
     public function getPaymentId(): ?string
     {
         return $this->data['paymentID'] ?? null;
@@ -42,7 +41,6 @@ class PaymentResponse extends BaseResponse
         return $this->data['customerMsisdn'] ?? null;
     }
 
-
     public function getTransactionStatus(): ?string
     {
         return $this->data['transactionStatus'] ?? null;
@@ -52,5 +50,4 @@ class PaymentResponse extends BaseResponse
     {
         return $this->data['merchantInvoiceNumber'] ?? null;
     }
-
 }

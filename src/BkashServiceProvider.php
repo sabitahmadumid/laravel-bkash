@@ -4,7 +4,6 @@ namespace SabitAhmad\Bkash;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use SabitAhmad\Bkash\Commands\BkashCommand;
 
 class BkashServiceProvider extends PackageServiceProvider
 {
@@ -17,10 +16,10 @@ class BkashServiceProvider extends PackageServiceProvider
             ->hasMigration('create_bkash_payments');
     }
 
-   public function packageRegistered(): void
-   {
-       $this->app->singleton(Bkash::class, function () {
-           return new Bkash();
-       });
-   }
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(Bkash::class, function () {
+            return new Bkash;
+        });
+    }
 }

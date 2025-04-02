@@ -11,9 +11,10 @@ use SabitAhmad\Bkash\Responses\PaymentResponse;
 use SabitAhmad\Bkash\Responses\QueryResponse;
 use SabitAhmad\Bkash\Responses\RefundResponse;
 
-class Bkash {
-
+class Bkash
+{
     protected mixed $config;
+
     protected mixed $shouldLogTransactions;
 
     public function __construct()
@@ -35,7 +36,6 @@ class Bkash {
             $invoiceNumber,
             $merchantAssociationInfo,
         );
-
 
         $response = $this->makeRequest('POST', $this->getUrl('create'), [
             'mode' => '0011',
@@ -69,7 +69,6 @@ class Bkash {
 
         return new PaymentResponse($response);
     }
-
 
     /**
      * @throws BkashException
@@ -132,20 +131,21 @@ class Bkash {
                 ->timeout(30)
                 ->{$method}($url, $data);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 if ($response->status() === 401) {
                     $this->refreshToken();
+
                     return $this->makeRequest($method, $url, $data);
                 }
 
                 throw new BkashException(
-                    'API request failed: ' . $response->json('errorMessage', 'Unknown error')
+                    'API request failed: '.$response->json('errorMessage', 'Unknown error')
                 );
             }
 
             return $response->json();
         } catch (\Exception $e) {
-            throw new BkashException('API request failed: ' . $e->getMessage());
+            throw new BkashException('API request failed: '.$e->getMessage());
         }
     }
 
@@ -172,7 +172,7 @@ class Bkash {
                 'app_secret' => $this->config['credentials']['app_secret'],
             ]);
 
-        if (!$response->successful() || !$response->json('id_token')) {
+        if (! $response->successful() || ! $response->json('id_token')) {
             throw BkashException::tokenGenerationFailed();
         }
 
@@ -190,29 +190,32 @@ class Bkash {
             'Authorization' => $currentToken,
             'Content-Type' => 'application/json',
         ])->post($this->getUrl('token/refresh'), [
-                'app_key' => $this->config['credentials']['app_key'],
-                'app_secret' => $this->config['credentials']['app_secret'],
+            'app_key' => $this->config['credentials']['app_key'],
+            'app_secret' => $this->config['credentials']['app_secret'],
         ]);
 
-        if (!$response->successful() || !$response->json('id_token')) {
+        if (! $response->successful() || ! $response->json('id_token')) {
             throw BkashException::tokenRefreshFailed();
         }
 
         Cache::put('bkash_token', $response->json('id_token'), now()->addSeconds(3300));
+
         return $response->json('id_token');
     }
 
     protected function getUrl(string $type): string
     {
         $mode = $this->config['sandbox'] ? 'sandbox' : 'production';
+
         return $this->config['urls'][$mode][$type];
     }
 
     /**
      * Validate request parameters
+     *
      * @throws BkashException
      */
-    protected function validateParameters( string $payerReference, string $invoiceNumber, ?string $merchantAssociationInfo): void
+    protected function validateParameters(string $payerReference, string $invoiceNumber, ?string $merchantAssociationInfo): void
     {
         // Validate special characters
         $invalidChars = ['<', '>', '&'];
