@@ -23,6 +23,31 @@ class BaseResponse
 
     public function getErrorMessage(): ?string
     {
-        return $this->data['errorMessage'] ?? null;
+        return $this->data['errorMessage'] ?? $this->data['statusMessage'] ?? null;
+    }
+
+    public function getStatusCode(): ?string
+    {
+        return $this->data['statusCode'] ?? null;
+    }
+
+    public function getStatusMessage(): ?string
+    {
+        return $this->data['statusMessage'] ?? null;
+    }
+
+    public function getErrorCode(): ?string
+    {
+        return $this->data['errorCode'] ?? null;
+    }
+
+    public function hasError(): bool
+    {
+        return ! $this->isSuccess();
+    }
+
+    public function toArray(): array
+    {
+        return $this->data;
     }
 }
