@@ -2,9 +2,23 @@
 
 All notable changes to `laravel-bkash` will be documented in this file.
 
+## v2.0.0 - 2025-09-24
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot[bot] in https://github.com/sabitahmadumid/laravel-bkash/pull/1
+* Bump aglipanci/laravel-pint-action from 2.5 to 2.6 by @dependabot[bot] in https://github.com/sabitahmadumid/laravel-bkash/pull/3
+
+### New Contributors
+
+* @dependabot[bot] made their first contribution in https://github.com/sabitahmadumid/laravel-bkash/pull/1
+
+**Full Changelog**: https://github.com/sabitahmadumid/laravel-bkash/compare/v1.0.0...v2.0.0
+
 ## [2.0.0] - 2024-09-24
 
 ### Added
+
 - **Complete Tokenized Checkout Support**: Added agreement management APIs (create, execute, query, cancel)
 - **Enhanced Response Classes**: Added more methods and better data access across all response types
 - **Search Transaction API**: Added ability to search transactions by transaction ID
@@ -19,6 +33,7 @@ All notable changes to `laravel-bkash` will be documented in this file.
 - **Code Examples**: Added comprehensive controller examples
 
 ### Changed
+
 - **Updated API URLs**: Updated to latest bKash endpoint configurations
 - **Improved Token Management**: Enhanced caching and refresh logic with better error handling
 - **Enhanced Database Migration**: Updated migration with new fields and indexes for better performance
@@ -26,18 +41,21 @@ All notable changes to `laravel-bkash` will be documented in this file.
 - **Code Organization**: Restructured code for better maintainability and performance
 
 ### Fixed
+
 - **Duplicate Code Removal**: Eliminated redundant code and improved efficiency
 - **Token Refresh Issues**: Fixed token refresh failures and added fallback mechanisms
 - **Response Parsing**: Improved response parsing and error handling
 - **Memory Usage**: Optimized memory usage in response classes
 
 ### Security
+
 - **Input Validation**: Enhanced parameter validation to prevent security issues
 - **Error Information**: Reduced sensitive information exposure in error messages
 
 ## [1.0.0] - 2024-01-01
 
 ### Added
+
 - Initial release with basic bKash integration
 - Payment creation and execution
 - Query and refund operations
