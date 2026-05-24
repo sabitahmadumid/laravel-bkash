@@ -40,6 +40,6 @@ class BkashCommand extends Command
             return str_repeat('*', $length);
         }
 
-        return substr($secret, 0, 4) . str_repeat('*', $length - 8) . substr($secret, -4);
+        return substr($secret, 0, 4).str_repeat('*', $length - 8).substr($secret, -4);
     }
 }

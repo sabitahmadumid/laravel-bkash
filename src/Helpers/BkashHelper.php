@@ -2,11 +2,12 @@
 
 namespace SabitAhmad\Bkash\Helpers;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 use SabitAhmad\Bkash\Contracts\BkashInterface;
 use SabitAhmad\Bkash\Exceptions\BkashException;
 use SabitAhmad\Bkash\Models\BkashPayment;
 use SabitAhmad\Bkash\Responses\PaymentResponse;
-use Illuminate\Support\Str;
 
 class BkashHelper
 {
@@ -96,7 +97,7 @@ class BkashHelper
     /**
      * Get transaction history for a specific payer reference
      */
-    public function getTransactionHistory(string $payerReference, ?int $limit = null): \Illuminate\Database\Eloquent\Collection
+    public function getTransactionHistory(string $payerReference, ?int $limit = null): Collection
     {
         $query = BkashPayment::where('payer_reference', $payerReference)
             ->recent();
@@ -111,7 +112,7 @@ class BkashHelper
     /**
      * Get successful transactions only
      */
-    public function getSuccessfulTransactions(?int $limit = null): \Illuminate\Database\Eloquent\Collection
+    public function getSuccessfulTransactions(?int $limit = null): Collection
     {
         $query = BkashPayment::successful()->recent();
 

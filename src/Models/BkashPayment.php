@@ -20,7 +20,7 @@ class BkashPayment extends Model
         'status',
         'status_code',
         'status_message',
-        'response'
+        'response',
     ];
 
     protected $casts = [
@@ -55,7 +55,7 @@ class BkashPayment extends Model
     {
         return $query->where(function (Builder $q) {
             $q->where('status', TransactionStatus::SUCCESS)
-              ->orWhere('status', TransactionStatus::COMPLETED);
+                ->orWhere('status', TransactionStatus::COMPLETED);
         });
     }
 
@@ -63,7 +63,7 @@ class BkashPayment extends Model
     {
         return $query->where(function (Builder $q) {
             $q->where('status', TransactionStatus::FAILED)
-              ->orWhere('status', 'Failed');
+                ->orWhere('status', 'Failed');
         });
     }
 

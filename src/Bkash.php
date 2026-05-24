@@ -343,7 +343,7 @@ class Bkash implements BkashInterface
     protected function getToken(): string
     {
         $ttl = $this->config['token_cache_ttl'] ?? 3300;
-        
+
         return Cache::remember($this->tokenCacheKey, $ttl, function () {
             return $this->generateToken();
         });
@@ -403,8 +403,6 @@ class Bkash implements BkashInterface
         }
     }
 
-
-
     /**
      * Get API URL for specific endpoint
      *
@@ -413,7 +411,7 @@ class Bkash implements BkashInterface
     protected function getUrl(string $type): string
     {
         $mode = ($this->config['sandbox'] ?? true) ? 'sandbox' : 'production';
-        
+
         // Backward compatibility with old config structure
         if (isset($this->config['urls'][$mode][$type])) {
             return $this->config['urls'][$mode][$type];
@@ -426,7 +424,7 @@ class Bkash implements BkashInterface
             throw new BkashException("API endpoint '{$type}' not found for {$mode} mode");
         }
 
-        return $baseUrl . '/' . $endpoint;
+        return $baseUrl.'/'.$endpoint;
     }
 
     /**

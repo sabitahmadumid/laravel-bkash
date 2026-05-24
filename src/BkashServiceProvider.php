@@ -2,11 +2,11 @@
 
 namespace SabitAhmad\Bkash;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use SabitAhmad\Bkash\Commands\BkashCommand;
 use SabitAhmad\Bkash\Contracts\BkashInterface;
 use SabitAhmad\Bkash\Helpers\BkashHelper;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class BkashServiceProvider extends PackageServiceProvider
 {
