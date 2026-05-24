@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use SabitAhmad\Bkash\Exceptions\BkashException;
 use SabitAhmad\Bkash\Facades\Bkash;
 use SabitAhmad\Bkash\Helpers\BkashHelper;
+use SabitAhmad\Bkash\Contracts\BkashInterface;
 
 class BkashController extends Controller
 {
@@ -15,7 +16,7 @@ class BkashController extends Controller
 
     public function __construct()
     {
-        $this->bkashHelper = new BkashHelper(app(\SabitAhmad\Bkash\Bkash::class));
+        $this->bkashHelper = new BkashHelper(app(BkashInterface::class));
     }
 
     /**
