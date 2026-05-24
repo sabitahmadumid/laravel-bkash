@@ -12,13 +12,14 @@ return new class extends Migration {
             $table->string('type')->index(); // Type of transaction (create_payment, execute_payment, etc.)
             $table->string('payment_id')->nullable()->index(); // Payment ID or Agreement ID
             $table->string('trx_id')->nullable()->index(); // bKash transaction ID
+            $table->string('payer_reference')->nullable()->index();
+            $table->string('invoice_number')->nullable()->index();
             $table->decimal('amount', 15, 2)->nullable(); // Amount (increased precision)
             $table->string('status')->default('pending')->index(); // Transaction status
             $table->string('status_code')->nullable(); // bKash status code
             $table->string('status_message')->nullable(); // bKash status message
             $table->json('response')->nullable(); // Full API response
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
 
             // Add indexes for common queries
             $table->index(['type', 'status']);

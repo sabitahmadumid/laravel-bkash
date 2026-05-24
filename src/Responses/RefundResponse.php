@@ -8,7 +8,7 @@ class RefundResponse extends BaseResponse
 {
     public function getRefundId(): ?string
     {
-        return $this->data['refundTrxID'] ?? $this->data['refundID'] ?? null;
+        return $this->data['refundTrxID'] ?? null;
     }
 
     public function getOriginalPaymentId(): ?string
@@ -56,5 +56,10 @@ class RefundResponse extends BaseResponse
     public function getReason(): ?string
     {
         return $this->data['reason'] ?? null;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->getTransactionStatus() === 'Completed';
     }
 }

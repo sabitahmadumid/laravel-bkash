@@ -4,10 +4,24 @@ namespace SabitAhmad\Bkash\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use SabitAhmad\Bkash\Enums\TransactionStatus;
 
 class BkashPayment extends Model
 {
-    protected $guarded = [];
+    protected $table = 'bkash_payments';
+
+    protected $fillable = [
+        'type',
+        'payment_id',
+        'trx_id',
+        'payer_reference',
+        'invoice_number',
+        'amount',
+        'status',
+        'status_code',
+        'status_message',
+        'response'
+    ];
 
     protected $casts = [
         'response' => 'array',
@@ -39,14 +53,18 @@ class BkashPayment extends Model
 
     public function scopeSuccessful(Builder $query): Builder
     {
-        return $query->where('status', 'success')
-            ->orWhere('status', 'Completed');
+        return $query->where(function (Builder $q) {
+            $q->where('status', TransactionStatus::SUCCESS)
+              ->orWhere('status', TransactionStatus::COMPLETED);
+        });
     }
 
     public function scopeFailed(Builder $query): Builder
     {
-        return $query->where('status', 'failed')
-            ->orWhere('status', 'Failed');
+        return $query->where(function (Builder $q) {
+            $q->where('status', TransactionStatus::FAILED)
+              ->orWhere('status', 'Failed');
+        });
     }
 
     public function scopeRecent(Builder $query): Builder
@@ -54,20 +72,19 @@ class BkashPayment extends Model
         return $query->orderBy('created_at', 'desc');
     }
 
-    // Helper methods
     public function isSuccessful(): bool
     {
-        return in_array($this->status, ['success', 'Completed']);
+        return in_array($this->status, [TransactionStatus::SUCCESS, TransactionStatus::COMPLETED]);
     }
 
     public function isFailed(): bool
     {
-        return in_array($this->status, ['failed', 'Failed']);
+        return in_array($this->status, [TransactionStatus::FAILED, 'Failed']);
     }
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === TransactionStatus::PENDING;
     }
 
     public function getResponseData(?string $key = null, $default = null)

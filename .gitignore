@@ -1,5 +1,4 @@
 # Composer Related
-composer.lock
 /vendor
 
 # Frontend Assets
@@ -30,3 +29,4 @@ phpstan.neon
 testbench.yaml
 /docs
 /coverage
+.DS_Store

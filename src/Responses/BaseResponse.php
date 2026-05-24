@@ -50,4 +50,14 @@ class BaseResponse
     {
         return $this->data;
     }
+
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->data, $options);
+    }
+
+    public function __toString(): string
+    {
+        return $this->toJson();
+    }
 }
