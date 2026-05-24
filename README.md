@@ -34,7 +34,7 @@ A comprehensive solution for integrating bKash payments into Laravel application
 
 ## Requirements
 - PHP 8.0+
-- Laravel 9.x+
+- Laravel 8.x+
 - Composer
 - bKash Merchant Account
 
@@ -73,14 +73,13 @@ return [
         'username' => env('BKASH_USERNAME'),
         'password' => env('BKASH_PASSWORD'),
     ],
-    'urls' => [
-        'sandbox' => [
-            'token' => 'https://checkout.sandbox.bka.sh/v1.2.0-beta/checkout/token/grant',
-            // ... other endpoints
-        ],
-        'production' => [
-            // Production endpoints
-        ]
+    'base_url' => [
+        'sandbox' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout',
+        'production' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout',
+    ],
+    'endpoints' => [
+        'token' => '/token/grant',
+        // ... other endpoints
     ],
     'callback_url' => env('BKASH_CALLBACK_URL', '/bkash/callback'),
     'redirect_url' => env('BKASH_REDIRECT_URL', '/payment/redirect'),
@@ -435,9 +434,26 @@ composer test
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
+## Upgrading from 2.0 to 2.1
+
+If you are upgrading from `v2.0.x`, please note the following changes:
+
+1. **Config File Updates**: The `urls` configuration array has been simplified. If you previously published the config file, you may want to republish it or update your config to use the new `base_url` and `endpoints` format. The package maintains backward compatibility for existing configurations.
+2. **Database Migrations**: The `bkash_payments` table has two new columns: `payer_reference` and `invoice_number`. Please publish the updated migration and run `php artisan migrate`.
+3. **Status Constants**: We recommend replacing hardcoded magic strings (e.g., `'Completed'`) with the new `SabitAhmad\Bkash\Enums\TransactionStatus` class constants.
+4. **Interface Injection**: You can now type-hint `SabitAhmad\Bkash\Contracts\BkashInterface` instead of the concrete `Bkash` class.
+
 ## Recent Improvements
 
-### Version 2.0.0 (Latest)
+### Version 2.1.0
+- ✅ **Simplified Configuration** - Replaced individual endpoint URLs with concise base URLs.
+- ✅ **Architectural Refactor** - Extracted `BkashInterface` for easier mocking and testing.
+- ✅ **Database Enhancements** - Upgraded the migration with `payer_reference` and `invoice_number` for faster queries, eliminating dependency on JSON columns.
+- ✅ **Status Enums** - Introduced `TransactionStatus` constants for cleaner code.
+- ✅ **Extended Compatibility** - Backwards compatibility restored for PHP 8.0+ and Laravel 8.0+.
+- ✅ **Diagnostics Command** - Added `php artisan bkash:status` to quickly verify configurations.
+
+### Version 2.0.0
 - ✅ **Complete Tokenized Checkout Support** - Agreement management APIs
 - ✅ **Enhanced Response Classes** - More methods and better data access
 - ✅ **Advanced Error Handling** - Retry mechanisms and detailed exceptions
