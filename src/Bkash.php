@@ -5,6 +5,8 @@ namespace SabitAhmad\Bkash;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use SabitAhmad\Bkash\Contracts\BkashInterface;
 use SabitAhmad\Bkash\Events\AgreementCreated;
 use SabitAhmad\Bkash\Events\PaymentCompleted;
 use SabitAhmad\Bkash\Events\PaymentFailed;
@@ -16,15 +18,13 @@ use SabitAhmad\Bkash\Responses\QueryResponse;
 use SabitAhmad\Bkash\Responses\RefundResponse;
 use SabitAhmad\Bkash\Responses\SearchResponse;
 
-class Bkash
+class Bkash implements BkashInterface
 {
     protected array $config;
 
     protected bool $shouldLogTransactions;
 
     protected string $tokenCacheKey = 'bkash_token';
-
-    protected int $tokenCacheTtl = 3300; // 55 minutes
 
     public function __construct()
     {
@@ -51,9 +51,7 @@ class Bkash
             'intent' => 'sale',
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('create_agreement', $response);
-        }
+        $this->logTransaction('create_agreement', $response);
 
         return new AgreementResponse($response);
     }
@@ -69,9 +67,7 @@ class Bkash
             'paymentID' => $paymentId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('execute_agreement', $response);
-        }
+        $this->logTransaction('execute_agreement', $response);
 
         $agreementResponse = new AgreementResponse($response);
 
@@ -94,9 +90,7 @@ class Bkash
             'agreementID' => $agreementId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('query_agreement', $response);
-        }
+        $this->logTransaction('query_agreement', $response);
 
         return new AgreementResponse($response);
     }
@@ -112,9 +106,7 @@ class Bkash
             'agreementID' => $agreementId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('cancel_agreement', $response);
-        }
+        $this->logTransaction('cancel_agreement', $response);
 
         return new AgreementResponse($response);
     }
@@ -147,9 +139,7 @@ class Bkash
 
         $response = $this->makeRequest('POST', $this->getUrl('create'), $payload);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('create_payment', $response);
-        }
+        $this->logTransaction('create_payment', $response);
 
         return new PaymentResponse($response);
     }
@@ -163,19 +153,15 @@ class Bkash
             'paymentID' => $paymentId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('execute_payment', $response);
-        }
+        $this->logTransaction('execute_payment', $response);
 
         $paymentResponse = new PaymentResponse($response);
 
         // Dispatch appropriate event based on payment status
-        if ($paymentResponse->isSuccess()) {
-            if ($paymentResponse->isCompleted()) {
-                event(new PaymentCompleted($paymentResponse));
-            } elseif ($paymentResponse->isFailed()) {
-                event(new PaymentFailed($paymentResponse));
-            }
+        if ($paymentResponse->isCompleted()) {
+            event(new PaymentCompleted($paymentResponse));
+        } elseif ($paymentResponse->isFailed()) {
+            event(new PaymentFailed($paymentResponse));
         }
 
         return $paymentResponse;
@@ -188,13 +174,11 @@ class Bkash
     {
         $response = $this->makeRequest('POST', $this->getUrl('refund'), [
             'paymentID' => $paymentId,
-            'amount' => $amount,
+            'amount' => (string) $amount,
             'reason' => $reason,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('refund_payment', $response);
-        }
+        $this->logTransaction('refund_payment', $response);
 
         return new RefundResponse($response);
     }
@@ -210,9 +194,7 @@ class Bkash
             'paymentID' => $paymentId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('query_payment', $response);
-        }
+        $this->logTransaction('query_payment', $response);
 
         return new QueryResponse($response);
     }
@@ -228,9 +210,7 @@ class Bkash
             'trxID' => $trxId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('search_transaction', $response);
-        }
+        $this->logTransaction('search_transaction', $response);
 
         return new SearchResponse($response);
     }
@@ -247,9 +227,7 @@ class Bkash
             'trxID' => $refundId,
         ]);
 
-        if ($this->shouldLogTransactions) {
-            $this->logTransaction('refund_status', $response);
-        }
+        $this->logTransaction('refund_status', $response);
 
         return new RefundResponse($response);
     }
@@ -268,6 +246,8 @@ class Bkash
                 'type' => $type,
                 'payment_id' => $response['paymentID'] ?? $response['agreementID'] ?? null,
                 'trx_id' => $response['trxID'] ?? null,
+                'payer_reference' => $response['payerReference'] ?? null,
+                'invoice_number' => $response['merchantInvoiceNumber'] ?? null,
                 'amount' => $response['amount'] ?? null,
                 'status' => $response['transactionStatus'] ?? $response['agreementStatus'] ?? ($response['statusCode'] === '0000' ? 'success' : 'failed'),
                 'status_code' => $response['statusCode'] ?? null,
@@ -278,7 +258,7 @@ class Bkash
             ]);
         } catch (\Exception $e) {
             // Log to Laravel log if database logging fails
-            \Log::warning('Failed to log bKash transaction to database: '.$e->getMessage(), [
+            Log::warning('Failed to log bKash transaction to database: '.$e->getMessage(), [
                 'type' => $type,
                 'response' => $response,
             ]);
@@ -286,16 +266,15 @@ class Bkash
     }
 
     /**
-     * @throws BkashException
-     */
-    /**
      * Make HTTP request to bKash API with proper error handling
      *
      * @throws BkashException
      */
     protected function makeRequest(string $method, string $url, array $data = []): array
     {
-        $maxRetries = 3;
+        $maxRetries = $this->config['retry_attempts'] ?? 3;
+        $retryDelay = $this->config['retry_delay'] ?? 1000;
+        $timeout = $this->config['timeout'] ?? 30;
         $attempt = 0;
 
         while ($attempt < $maxRetries) {
@@ -307,8 +286,7 @@ class Bkash
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
                 ])
-                    ->timeout(30)
-                    ->retry(2, 1000) // Retry 2 times with 1 second delay
+                    ->timeout($timeout)
                     ->{$method}($url, $data);
 
                 if ($response->successful()) {
@@ -337,7 +315,7 @@ class Bkash
             } catch (ConnectionException $e) {
                 if ($attempt < $maxRetries - 1) {
                     $attempt++;
-                    sleep(1); // Wait 1 second before retry
+                    usleep($retryDelay * 1000); // Delay in microseconds
 
                     continue;
                 }
@@ -364,7 +342,9 @@ class Bkash
      */
     protected function getToken(): string
     {
-        return Cache::remember($this->tokenCacheKey, $this->tokenCacheTtl, function () {
+        $ttl = $this->config['token_cache_ttl'] ?? 3300;
+        
+        return Cache::remember($this->tokenCacheKey, $ttl, function () {
             return $this->generateToken();
         });
     }
@@ -423,55 +403,7 @@ class Bkash
         }
     }
 
-    /**
-     * Refresh existing token
-     *
-     * @throws BkashException
-     */
-    protected function refreshToken(): string
-    {
-        try {
-            $currentToken = Cache::get($this->tokenCacheKey);
-            if (! $currentToken) {
-                return $this->generateToken();
-            }
 
-            $credentials = $this->config['credentials'] ?? [];
-
-            $response = Http::withHeaders([
-                'Authorization' => $currentToken,
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ])
-                ->timeout(30)
-                ->post($this->getUrl('token/refresh'), [
-                    'app_key' => $credentials['app_key'] ?? '',
-                    'app_secret' => $credentials['app_secret'] ?? '',
-                ]);
-
-            if (! $response->successful()) {
-                // If refresh fails, generate new token
-                $this->clearTokenCache();
-
-                return $this->generateToken();
-            }
-
-            $newToken = $response->json('id_token');
-            if (! $newToken) {
-                $this->clearTokenCache();
-
-                return $this->generateToken();
-            }
-
-            Cache::put($this->tokenCacheKey, $newToken, now()->addSeconds($this->tokenCacheTtl));
-
-            return $newToken;
-        } catch (\Exception $e) {
-            $this->clearTokenCache();
-
-            return $this->generateToken();
-        }
-    }
 
     /**
      * Get API URL for specific endpoint
@@ -480,14 +412,21 @@ class Bkash
      */
     protected function getUrl(string $type): string
     {
-        $mode = $this->config['sandbox'] ? 'sandbox' : 'production';
-        $urls = $this->config['urls'][$mode] ?? [];
+        $mode = ($this->config['sandbox'] ?? true) ? 'sandbox' : 'production';
+        
+        // Backward compatibility with old config structure
+        if (isset($this->config['urls'][$mode][$type])) {
+            return $this->config['urls'][$mode][$type];
+        }
 
-        if (! isset($urls[$type])) {
+        $baseUrl = rtrim($this->config['base_url'][$mode] ?? '', '/');
+        $endpoint = ltrim($this->config['endpoints'][$type] ?? '', '/');
+
+        if (empty($baseUrl) || empty($endpoint)) {
             throw new BkashException("API endpoint '{$type}' not found for {$mode} mode");
         }
 
-        return $urls[$type];
+        return $baseUrl . '/' . $endpoint;
     }
 
     /**
@@ -536,8 +475,10 @@ class Bkash
             throw new BkashException('Payer reference cannot exceed 255 characters');
         }
 
-        if (strpbrk($payerReference, implode('', $invalidChars)) !== false) {
-            throw new BkashException('Payer reference contains invalid characters: '.implode(', ', $invalidChars));
+        foreach ($invalidChars as $char) {
+            if (str_contains($payerReference, $char)) {
+                throw new BkashException('Payer reference contains invalid characters: '.implode(', ', $invalidChars));
+            }
         }
     }
 
@@ -560,8 +501,10 @@ class Bkash
             throw new BkashException('Invoice number cannot exceed 255 characters');
         }
 
-        if (strpbrk($invoiceNumber, implode('', $invalidChars)) !== false) {
-            throw new BkashException('Invoice number contains invalid characters: '.implode(', ', $invalidChars));
+        foreach ($invalidChars as $char) {
+            if (str_contains($invoiceNumber, $char)) {
+                throw new BkashException('Invoice number contains invalid characters: '.implode(', ', $invalidChars));
+            }
         }
 
         if ($merchantAssociationInfo !== null) {
@@ -569,8 +512,10 @@ class Bkash
                 throw new BkashException('Merchant association info cannot exceed 255 characters');
             }
 
-            if (strpbrk($merchantAssociationInfo, implode('', $invalidChars)) !== false) {
-                throw new BkashException('Merchant association info contains invalid characters: '.implode(', ', $invalidChars));
+            foreach ($invalidChars as $char) {
+                if (str_contains($merchantAssociationInfo, $char)) {
+                    throw new BkashException('Merchant association info contains invalid characters: '.implode(', ', $invalidChars));
+                }
             }
         }
     }

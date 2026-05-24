@@ -12,37 +12,25 @@ return [
         'password' => env('BKASH_PASSWORD'),
     ],
 
-    'urls' => [
-        'sandbox' => [
-            'token' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant',
-            'token/refresh' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/refresh',
-            'create' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/create',
-            'execute' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/execute',
-            'query' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/payment/status',
-            'refund' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/payment/refund',
-            'refund/status' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/payment/refund',
-            'search' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/general/searchTransaction',
-            // Agreement APIs for tokenized checkout
-            'agreement/create' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/create',
-            'agreement/execute' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/execute',
-            'agreement/query' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/agreement/status',
-            'agreement/cancel' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/agreement/cancel',
-        ],
-        'production' => [
-            'token' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant',
-            'token/refresh' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/token/refresh',
-            'create' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/create',
-            'execute' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/execute',
-            'query' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/payment/status',
-            'refund' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/payment/refund',
-            'refund/status' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/payment/refund',
-            'search' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/general/searchTransaction',
-            // Agreement APIs for tokenized checkout
-            'agreement/create' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/create',
-            'agreement/execute' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/execute',
-            'agreement/query' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/agreement/status',
-            'agreement/cancel' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/agreement/cancel',
-        ],
+    'base_url' => [
+        'sandbox' => 'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout',
+        'production' => 'https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout',
+    ],
+
+    'endpoints' => [
+        'token' => '/token/grant',
+        'token/refresh' => '/token/refresh',
+        'create' => '/create',
+        'execute' => '/execute',
+        'query' => '/payment/status',
+        'refund' => '/payment/refund',
+        'refund/status' => '/payment/refund/status',
+        'search' => '/general/searchTransaction',
+        // Agreement APIs for tokenized checkout
+        'agreement/create' => '/agreement/create',
+        'agreement/execute' => '/agreement/execute',
+        'agreement/query' => '/agreement/status',
+        'agreement/cancel' => '/agreement/cancel',
     ],
 
     'callback_url' => env('BKASH_CALLBACK_URL', '/bkash/callback'),

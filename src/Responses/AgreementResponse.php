@@ -11,6 +11,11 @@ class AgreementResponse extends BaseResponse
         return $this->data['agreementID'] ?? null;
     }
 
+    public function getPaymentId(): ?string
+    {
+        return $this->data['paymentID'] ?? null;
+    }
+
     public function getAgreementExecuteTime(): ?Carbon
     {
         return isset($this->data['agreementExecuteTime'])
@@ -46,5 +51,10 @@ class AgreementResponse extends BaseResponse
     public function getStatusMessage(): ?string
     {
         return $this->data['statusMessage'] ?? null;
+    }
+
+    public function isAuthorized(): bool
+    {
+        return $this->getAgreementStatus() === 'Authorized';
     }
 }

@@ -2,16 +2,17 @@
 
 namespace SabitAhmad\Bkash\Helpers;
 
-use SabitAhmad\Bkash\Bkash;
+use SabitAhmad\Bkash\Contracts\BkashInterface;
 use SabitAhmad\Bkash\Exceptions\BkashException;
 use SabitAhmad\Bkash\Models\BkashPayment;
 use SabitAhmad\Bkash\Responses\PaymentResponse;
+use Illuminate\Support\Str;
 
 class BkashHelper
 {
-    protected Bkash $bkash;
+    protected BkashInterface $bkash;
 
-    public function __construct(Bkash $bkash)
+    public function __construct(BkashInterface $bkash)
     {
         $this->bkash = $bkash;
     }
@@ -97,7 +98,7 @@ class BkashHelper
      */
     public function getTransactionHistory(string $payerReference, ?int $limit = null): \Illuminate\Database\Eloquent\Collection
     {
-        $query = BkashPayment::where('response->payerReference', $payerReference)
+        $query = BkashPayment::where('payer_reference', $payerReference)
             ->recent();
 
         if ($limit) {
@@ -134,7 +135,7 @@ class BkashHelper
      */
     public static function generatePayerReference(string $prefix = 'PAY'): string
     {
-        return $prefix.'_'.time().'_'.substr(md5(uniqid()), 0, 8);
+        return $prefix.'_'.time().'_'.Str::random(8);
     }
 
     /**
@@ -142,7 +143,7 @@ class BkashHelper
      */
     public static function generateInvoiceNumber(string $prefix = 'INV'): string
     {
-        return $prefix.'_'.date('Ymd').'_'.substr(md5(uniqid()), 0, 10);
+        return $prefix.'_'.date('Ymd').'_'.Str::random(10);
     }
 
     /**
