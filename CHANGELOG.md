@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-bkash` will be documented in this file.
 
+## v2.1.0 - 2026-07-18
+
+**Full Changelog**: https://github.com/sabitahmadumid/laravel-bkash/compare/v2.0.0...v2.1.0
+
 ## v2.0.0 - 2025-09-24
 
 ### What's Changed
