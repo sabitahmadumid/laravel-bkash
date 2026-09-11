@@ -3,6 +3,7 @@
 namespace SabitAhmad\Bkash\Helpers;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use SabitAhmad\Bkash\Contracts\BkashInterface;
 use SabitAhmad\Bkash\Exceptions\BkashException;
@@ -187,5 +188,55 @@ class BkashHelper
                 'error_code' => $e->getErrorCode(),
             ];
         }
+    }
+
+    /**
+     * Validate callback payload
+     */
+    public function validateCallback(array $callbackData): bool
+    {
+        return ! empty($callbackData['paymentID']) &&
+               isset($callbackData['status']) &&
+               in_array(strtolower($callbackData['status']), ['success', 'failure', 'cancel']);
+    }
+
+    /**
+     * Handle bKash Webhook / Instant Payment Notification (AWS SNS payload)
+     */
+    public function handleWebhook(array $payload): array
+    {
+        $type = $payload['Type'] ?? null;
+
+        if ($type === 'SubscriptionConfirmation') {
+            if (! empty($payload['SubscribeURL'])) {
+                Http::timeout(15)->get($payload['SubscribeURL']);
+            }
+
+            return [
+                'type' => 'SubscriptionConfirmation',
+                'status' => 'confirmed',
+                'topic_arn' => $payload['TopicArn'] ?? null,
+                'message_id' => $payload['MessageId'] ?? null,
+            ];
+        }
+
+        if ($type === 'Notification') {
+            $rawMessage = $payload['Message'] ?? '{}';
+            $messageData = is_string($rawMessage) ? json_decode($rawMessage, true) : $rawMessage;
+
+            return [
+                'type' => 'Notification',
+                'status' => 'received',
+                'data' => is_array($messageData) ? $messageData : [],
+                'topic_arn' => $payload['TopicArn'] ?? null,
+                'timestamp' => $payload['Timestamp'] ?? null,
+            ];
+        }
+
+        return [
+            'type' => $type ?? 'Unknown',
+            'status' => 'unhandled',
+            'raw' => $payload,
+        ];
     }
 }

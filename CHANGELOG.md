@@ -2,6 +2,25 @@
 
 All notable changes to `laravel-bkash` will be documented in this file.
 
+## v2.2.0 - 2026-09-12
+
+### Added
+- Full support for Laravel 13.x and PHP 8.3/8.4 runtimes
+- Official bKash Token Refresh API implementation (`refreshToken()`) to prevent rate-limiting blocks
+- Mandatory `X-App-Key` header on all API calls according to bKash API specifications
+- `AgreementCancelled` event dispatched when an agreement is cancelled
+- `handleWebhook()` in `BkashHelper` for AWS SNS / IPN notifications and automatic subscription confirmation
+- `validateCallback()` in `BkashHelper` for callback verification
+- Complete bKash Error Code mapping in `BkashException::ERROR_CODES` including refund error codes (2071-2082, 2127)
+- `trxId` and `sku` parameters to `refundPayment()`
+
+### Changed
+- Updated `illuminate/contracts` constraint to include `^13.0`
+- Synchronized and updated `composer.lock` dependencies
+- Corrected agreement create and execute endpoints to official `/create` and `/execute` paths
+- Added `isCompleted()`, `isInitiated()`, and `isCancelled()` to `AgreementResponse`
+- Fixed error code mismatches in `BkashException` factory methods (`2023`, `2029`, `2069`, `2053`, `2018`)
+
 ## v2.1.0 - 2026-07-18
 
 **Full Changelog**: https://github.com/sabitahmadumid/laravel-bkash/compare/v2.0.0...v2.1.0

@@ -55,6 +55,21 @@ class AgreementResponse extends BaseResponse
 
     public function isAuthorized(): bool
     {
-        return $this->getAgreementStatus() === 'Authorized';
+        return $this->getAgreementStatus() === 'Authorized' || $this->isCompleted();
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->getAgreementStatus() === 'Completed';
+    }
+
+    public function isInitiated(): bool
+    {
+        return $this->getAgreementStatus() === 'Initiated';
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->getAgreementStatus() === 'Cancelled';
     }
 }

@@ -24,11 +24,13 @@ interface BkashInterface
 
     public function queryPayment(string $paymentId): QueryResponse;
 
-    public function refundPayment(string $paymentId, float $amount, string $reason): RefundResponse;
+    public function refundPayment(string $paymentId, float $amount, string $reason, ?string $trxId = null, ?string $sku = null): RefundResponse;
 
     public function searchTransaction(string $trxId): SearchResponse;
 
     public function refundStatus(string $paymentId, string $refundId): RefundResponse;
+
+    public function refreshToken(?string $refreshToken = null): string;
 
     public function getConfig(): array;
 

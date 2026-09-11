@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use SabitAhmad\Bkash\Contracts\BkashInterface;
+use SabitAhmad\Bkash\Events\AgreementCancelled;
 use SabitAhmad\Bkash\Events\AgreementCreated;
 use SabitAhmad\Bkash\Events\PaymentCompleted;
 use SabitAhmad\Bkash\Events\PaymentFailed;
@@ -25,6 +26,8 @@ class Bkash implements BkashInterface
     protected bool $shouldLogTransactions;
 
     protected string $tokenCacheKey = 'bkash_token';
+
+    protected string $refreshTokenCacheKey = 'bkash_refresh_token';
 
     public function __construct()
     {
@@ -108,7 +111,13 @@ class Bkash implements BkashInterface
 
         $this->logTransaction('cancel_agreement', $response);
 
-        return new AgreementResponse($response);
+        $agreementResponse = new AgreementResponse($response);
+
+        if ($agreementResponse->isSuccess()) {
+            event(new AgreementCancelled($agreementResponse));
+        }
+
+        return $agreementResponse;
     }
 
     /**
@@ -170,13 +179,23 @@ class Bkash implements BkashInterface
     /**
      * @throws BkashException
      */
-    public function refundPayment(string $paymentId, float $amount, string $reason): RefundResponse
+    public function refundPayment(string $paymentId, float $amount, string $reason, ?string $trxId = null, ?string $sku = null): RefundResponse
     {
-        $response = $this->makeRequest('POST', $this->getUrl('refund'), [
+        $payload = [
             'paymentID' => $paymentId,
             'amount' => (string) $amount,
             'reason' => $reason,
-        ]);
+        ];
+
+        if ($trxId) {
+            $payload['trxID'] = $trxId;
+        }
+
+        if ($sku) {
+            $payload['sku'] = $sku;
+        }
+
+        $response = $this->makeRequest('POST', $this->getUrl('refund'), $payload);
 
         $this->logTransaction('refund_payment', $response);
 
@@ -280,9 +299,11 @@ class Bkash implements BkashInterface
         while ($attempt < $maxRetries) {
             try {
                 $token = $this->getToken();
+                $appKey = $this->config['credentials']['app_key'] ?? '';
 
                 $response = Http::withHeaders([
                     'Authorization' => $token,
+                    'X-App-Key' => $appKey,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
                 ])
@@ -342,11 +363,21 @@ class Bkash implements BkashInterface
      */
     protected function getToken(): string
     {
-        $ttl = $this->config['token_cache_ttl'] ?? 3300;
+        $token = Cache::get($this->tokenCacheKey);
+        if ($token) {
+            return $token;
+        }
 
-        return Cache::remember($this->tokenCacheKey, $ttl, function () {
-            return $this->generateToken();
-        });
+        $refreshToken = Cache::get($this->refreshTokenCacheKey);
+        if ($refreshToken) {
+            try {
+                return $this->refreshToken($refreshToken);
+            } catch (\Exception $e) {
+                // If refresh token fails, fallback to generateToken
+            }
+        }
+
+        return $this->generateToken();
     }
 
     /**
@@ -355,10 +386,11 @@ class Bkash implements BkashInterface
     protected function clearTokenCache(): void
     {
         Cache::forget($this->tokenCacheKey);
+        Cache::forget($this->refreshTokenCacheKey);
     }
 
     /**
-     * Generate new access token
+     * Generate new access token via Grant Token API
      *
      * @throws BkashException
      */
@@ -393,6 +425,13 @@ class Bkash implements BkashInterface
                 throw BkashException::tokenGenerationFailed();
             }
 
+            $ttl = $this->config['token_cache_ttl'] ?? 3300;
+            Cache::put($this->tokenCacheKey, $token, $ttl);
+
+            if ($refreshToken = $response->json('refresh_token')) {
+                Cache::put($this->refreshTokenCacheKey, $refreshToken, 86400);
+            }
+
             return $token;
         } catch (ConnectionException $e) {
             throw new BkashException('Network error during token generation: '.$e->getMessage());
@@ -400,6 +439,65 @@ class Bkash implements BkashInterface
             throw $e;
         } catch (\Exception $e) {
             throw new BkashException('Token generation failed: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Refresh access token using Refresh Token API
+     *
+     * @throws BkashException
+     */
+    public function refreshToken(?string $refreshToken = null): string
+    {
+        try {
+            $credentials = $this->config['credentials'] ?? [];
+            $refreshToken = $refreshToken ?? Cache::get($this->refreshTokenCacheKey);
+
+            if (! $refreshToken) {
+                return $this->generateToken();
+            }
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'username' => $credentials['username'] ?? '',
+                'password' => $credentials['password'] ?? '',
+            ])
+                ->timeout(30)
+                ->post($this->getUrl('token/refresh'), [
+                    'app_key' => $credentials['app_key'] ?? '',
+                    'app_secret' => $credentials['app_secret'] ?? '',
+                    'refresh_token' => $refreshToken,
+                ]);
+
+            if (! $response->successful()) {
+                $error = $response->json();
+                throw new BkashException(
+                    'Token refresh failed: '.($error['errorMessage'] ?? 'Unknown error'),
+                    $error['errorCode'] ?? null,
+                    $error['errorMessage'] ?? null
+                );
+            }
+
+            $token = $response->json('id_token');
+            if (! $token) {
+                throw BkashException::tokenRefreshFailed();
+            }
+
+            $ttl = $this->config['token_cache_ttl'] ?? 3300;
+            Cache::put($this->tokenCacheKey, $token, $ttl);
+
+            if ($newRefreshToken = $response->json('refresh_token')) {
+                Cache::put($this->refreshTokenCacheKey, $newRefreshToken, 86400);
+            }
+
+            return $token;
+        } catch (ConnectionException $e) {
+            throw new BkashException('Network error during token refresh: '.$e->getMessage());
+        } catch (BkashException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new BkashException('Token refresh failed: '.$e->getMessage());
         }
     }
 

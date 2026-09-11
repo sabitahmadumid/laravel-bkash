@@ -33,8 +33,8 @@ A comprehensive solution for integrating bKash payments into Laravel application
 - **Customizable Configuration**: Flexible configuration options
 
 ## Requirements
-- PHP 8.0+
-- Laravel 8.x+
+- PHP 8.0+ (PHP 8.3+ required for Laravel 13)
+- Laravel 8.x, 9.x, 10.x, 11.x, 12.x, or 13.x
 - Composer
 - bKash Merchant Account
 
@@ -445,6 +445,14 @@ If you are upgrading from `v2.0.x`, please note the following changes:
 
 ## Recent Improvements
 
+### Version 2.2.0
+- ✅ **Laravel 13 Support** - Complete compatibility with Laravel 13.x and PHP 8.3/8.4.
+- ✅ **bKash API Alignment** - Added mandatory `X-App-Key` header and aligned agreement endpoints (`/create`, `/execute`).
+- ✅ **Token Refresh Flow** - Implemented automatic token refresh via `POST /token/refresh` to prevent account rate-limiting blocks.
+- ✅ **Webhook / IPN Support** - Added `handleWebhook()` for automated AWS SNS IPN processing and subscription confirmations.
+- ✅ **Agreement Event Lifecycle** - Added `AgreementCancelled` event.
+- ✅ **Full Error Codes & Refund Params** - Added official error code mappings and `trxId`/`sku` refund support.
+
 ### Version 2.1.0
 - ✅ **Simplified Configuration** - Replaced individual endpoint URLs with concise base URLs.
 - ✅ **Architectural Refactor** - Extracted `BkashInterface` for easier mocking and testing.
@@ -471,7 +479,7 @@ If you are upgrading from `v2.0.x`, please note the following changes:
 
 ## Credits
 
-- [Sabit Ahmad](https://github.com/SabitAhmad)
+- [Sabit Ahmad](https://github.com/sabitahmadumid)
 
 ## License
 

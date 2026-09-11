@@ -27,8 +27,8 @@ return [
         'refund/status' => '/payment/refund/status',
         'search' => '/general/searchTransaction',
         // Agreement APIs for tokenized checkout
-        'agreement/create' => '/agreement/create',
-        'agreement/execute' => '/agreement/execute',
+        'agreement/create' => '/create',
+        'agreement/execute' => '/execute',
         'agreement/query' => '/agreement/status',
         'agreement/cancel' => '/agreement/cancel',
     ],
